@@ -129,9 +129,42 @@ base = base.drop(['Id', 'Name', 'Descrição', 'Endereço', 'NomesEspecies', 'Ti
    
 6. Engenharia de Atributos
 
-7. Separação em features (X) e target(Y)
+   1. Codificação de variáveis categóricas <br> Label Encoding: boas para variáveis ordinais, Por exemplo, para a variável `Sex` com valores `male` e `female`, pode-se atribuir `0` a `male` e `1` a `female`<br>Ideal para variáveis ordinais, ou seja, quando as categorias têm uma ordem natural (ex.: Pclass no Titanic, que representa classes de passageiro: 1ª, 2ª, 3ª, onde 1 < 2 < 3).
+     ```python
+    from sklearn.preprocessing import LabelEncoder
 
-8. Divisão de Treino e Teste
+    # Codificar Sex (se necessário)
+    lbl = LabelEncoder()
+    base['Sex'] = lbl.fit_transform(base['Sex'])
+    print(base['Sex'].head())
+    ```      
+    One-Hot Encoding: para variáveis nominais, transforma uma variável categórica em colunas binárias (0 ou 1) para cada categoria. Por exemplo, para `Tipos Alimentação` (`C` e `V`), criam-se duas     colunas: `Alim_C`, `Alim_V`, onde apenas uma coluna por linha tem valor 1.<br>Ideal para variáveis nominais, onde as categorias não têm ordem natural (ex.: a alimentação não tem uma que seja mas importante que a outra).
+     ```python
+    from sklearn.preprocessing import OneHotEncoder
+    from sklearn.compose import ColumnTransformer
+
+    # Transformador para aplicar OneHot apenas na coluna "Alimentacao"
+    ohe = ColumnTransformer(
+        transformers=[
+            ('OneHot', OneHotEncoder(drop='first'), ['Alimentacao'])
+        ],
+        remainder='passthrough'  # Mantém o restante das colunas
+    )
+
+    # Aplicando o transformador
+    base_array = ohe.fit_transform(base)
+
+    # Se quiser transformar em DataFrame novamente com nomes das colunas:
+    colunas_ohe = ohe.named_transformers_['OneHot'].get_feature_names_out(['Alimentacao'])
+    colunas_finais = list(colunas_ohe) + ['Nome', 'Idade']
+    base_final = pd.DataFrame(base_array, columns=colunas_finais)
+
+    print(base_final)
+    ```   
+
+8. Separação em features (X) e target(Y)
+
+9. Divisão de Treino e Teste
 11. Treinamento do modelo de Classificação
 12. Validação Cruzada
 13. Clusterin não supervisionado (K-Means)
