@@ -51,7 +51,7 @@ base = base.drop(['Id', 'Name', 'Descrição', 'Endereço', 'NomesEspecies', 'Ti
     # Nota! Caso seja preciso Realize essa função apos a Etapa de ANALISE EXPLORATORIAS
 
     ```
-6. Analise exploratorias
+5. Analise exploratorias
     1. Estatísticas descritivas (Média, mediana, mínimo, máximo, quartis, contagem.)
   
     ```python
@@ -119,16 +119,21 @@ base = base.drop(['Id', 'Name', 'Descrição', 'Endereço', 'NomesEspecies', 'Ti
     ```
     5. Mapa de calor de correlação: Identificar features multicolineares (que podem ser removidas ou combinadas).
      ```python
-   # Criar matriz de dispersão
-    fig = px.scatter_matrix(base, dimensions=['Colunas1', 'Coluna2'],)
-    fig.show()
+    #separar apenas atributos numéricos
+    base_separada = base.loc[:, ['QuantidadeVendas','Idade','DistanciaPercorrida']]
+
+    # Matriz de correlação
+    sns.heatmap(base_separada.corr(), annot=True, cmap="coolwarm")
+    plt.show()
     ```  
    
-7. Engenharia de Atributos
-8. Separação em features (X) e target(Y)
-9. Divisão de Treino e Teste
-10. Treinamento do modelo de Classificação
-11. Validação Cruzada
-12. Clusterin não supervisionado (K-Means)
-13. Treinamento Arvore de decisão
+6. Engenharia de Atributos
+
+7. Separação em features (X) e target(Y)
+
+8. Divisão de Treino e Teste
+11. Treinamento do modelo de Classificação
+12. Validação Cruzada
+13. Clusterin não supervisionado (K-Means)
+14. Treinamento Arvore de decisão
 
