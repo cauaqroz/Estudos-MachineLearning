@@ -129,7 +129,7 @@ base = base.drop(['Id', 'Name', 'Descrição', 'Endereço', 'NomesEspecies', 'Ti
    
 6. Engenharia de Atributos
 
-   1. Codificação de variáveis categóricas <br> Label Encoding: boas para variáveis ordinais, Por exemplo, para a variável `Sex` com valores `male` e `female`, pode-se atribuir `0` a `male` e `1` a `female`<br>Ideal para variáveis ordinais, ou seja, quando as categorias têm uma ordem natural (ex.: Pclass no Titanic, que representa classes de passageiro: 1ª, 2ª, 3ª, onde 1 < 2 < 3).
+   1. Codificação de variáveis categóricas (Label Encoding):<br> boas para variáveis ordinais, Por exemplo, para a variável `Sex` com valores `male` e `female`, pode-se atribuir `0` a `male` e `1` a `female`<br>Ideal para variáveis ordinais, ou seja, quando as categorias têm uma ordem natural (ex.: Pclass no Titanic, que representa classes de passageiro: 1ª, 2ª, 3ª, onde 1 < 2 < 3).
      ```python
     from sklearn.preprocessing import LabelEncoder
 
@@ -138,7 +138,7 @@ base = base.drop(['Id', 'Name', 'Descrição', 'Endereço', 'NomesEspecies', 'Ti
     base['Sex'] = lbl.fit_transform(base['Sex'])
     print(base['Sex'].head())
     ```      
-    One-Hot Encoding: para variáveis nominais, transforma uma variável categórica em colunas binárias (0 ou 1) para cada categoria. Por exemplo, para `Tipos Alimentação` (`C` e `V`), criam-se duas     colunas: `Alim_C`, `Alim_V`, onde apenas uma coluna por linha tem valor 1.<br>Ideal para variáveis nominais, onde as categorias não têm ordem natural (ex.: a alimentação não tem uma que seja mas importante que a outra).
+   2. One-Hot Encoding:<br> para variáveis nominais, transforma uma variável categórica em colunas binárias (0 ou 1) para cada categoria. Por exemplo, para `Tipos Alimentação` (`C` e `V`), criam-se duas     colunas: `Alim_C`, `Alim_V`, onde apenas uma coluna por linha tem valor 1.<br>Ideal para variáveis nominais, onde as categorias não têm ordem natural (ex.: a alimentação não tem uma que seja mas importante que a outra).
      ```python
     from sklearn.preprocessing import OneHotEncoder
     from sklearn.compose import ColumnTransformer
@@ -160,8 +160,36 @@ base = base.drop(['Id', 'Name', 'Descrição', 'Endereço', 'NomesEspecies', 'Ti
     base_final = pd.DataFrame(base_array, columns=colunas_finais)
 
     print(base_final)
-    ```   
+    ```
 
+     3. Padronização:<br>Transforma os dados para que tenham média igual a 0 e desvio padrão igual a 1, usado em dados como, Idade,Preços, Classe, que podem causar interferencia no modelo, A padronização equaliza a influência de todas as variáveis.
+     ```python
+   from sklearn.preprocessing import StandardScaler
+
+    #Quando usar: Para algoritmos como MLP, SVM, KNN, K-Means
+    #Quando as variáveis têm escalas diferentes (ex.: Age vs. Pclass no Titanic).
+    #Quando há outliers (ex.: valores altos de Age ou Fare na base completa do Titanic).
+     
+    scaler = StandardScaler()
+     
+    base[['Pclass', 'Sex', 'Age']] = scaler.fit_transform(base[['Pclass', 'Sex', 'Age']])
+    ```
+
+     4. Normalização:<br>Transforma os dados para um intervalo fixo, geralmente [0, 1], ou outro intervalo especificado (ex.: [-1, 1]), usada quando há intervalos especificados, como em Grau de Felicidade, que vai de 0-10, a normalização garante que todas variaveis contribuam igualmente para as distancias de modelos como KNN e K-means
+     ```python
+    from sklearn.preprocessing import MinMaxScaler
+
+    #Quando usar: Para algoritmos baseados em distancia como KNN, K-Means
+    #Quando os dados não têm outliers significativos, pois a normalização é sensível a valores extremos.
+    #Quando as variáveis já estão em escalas semelhantes(ex.: 0-10), mas precisam de um intervalo fixo (ex.: [0, 1]).
+     
+
+    scaler = MinMaxScaler()
+    X_scaled = scaler.fit_transform(base[['Pclass', 'Sex', 'Age']])
+
+    base['Grau de Felicidade Normalizado'] = scaler.fit_transform(base[['Grau de Felicidade']])
+    ```
+        
 8. Separação em features (X) e target(Y)
 
 9. Divisão de Treino e Teste
