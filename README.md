@@ -190,9 +190,24 @@ base = base.drop(['Id', 'Name', 'Descrição', 'Endereço', 'NomesEspecies', 'Ti
     base['Grau de Felicidade Normalizado'] = scaler.fit_transform(base[['Grau de Felicidade']])
     ```
         
-8. Separação em features (X) e target(Y)
+7. Separação em features (X) e target(Y): Isole a coluna alvo (classificação ou regressão) como vetor y, e todas as demais como matriz X.
+```python
+# Separar entrada (X) e saída (Y)
+X = base.drop('Col_Alvo', axis=1)
+Y = base['Col_Alvo']
 
-9. Divisão de Treino e Teste
+# Padronizar os dados
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+```
+
+8. Divisão de Treino e Teste: Dividir os dados em conjunto de treino (ex.: 70%) e teste (ex.: 30%)
+
+```python
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, shuffle=True, random_state=42, stratify=y)
+```
+
 11. Treinamento do modelo de Classificação
 12. Validação Cruzada
 13. Clusterin não supervisionado (K-Means)
