@@ -208,8 +208,148 @@ from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, shuffle=True, random_state=42, stratify=y)
 ```
 
-11. Treinamento do modelo de Classificação
-12. Validação Cruzada
-13. Clusterin não supervisionado (K-Means)
-14. Treinamento Arvore de decisão
+9. Treinamento do modelo de Classificação
 
+   1.MLP-Classifier: projetado para problemas de classificação, Prevê rótulos categóricos (ex.: classes 0/1, "sim/não", ou múltiplas classes).
+   
+    ```python
+    # Treinar com fit(X_train, y_train).
+    mlp = MLPClassifier(hidden_layer_sizes=(100, 50), max_iter=1000, activation='logistic', solver='adam', random_state=42, verbose=True)
+    mlp.fit(X_train, Y_train)
+
+    # Verificar Acurácia Inicial
+    # Underfitting: Acurácia baixa em treino e teste → aumentar camadas/neurônios ou iterações.
+    # Overfitting: Acurácia alta em treino, baixa em teste → reduzir camadas/neurônios, adicionar regularização
+
+    from sklearn.metrics import accuracy_score
+    train_acc = accuracy_score(y_train, mlp.predict(X_train))
+    test_acc = accuracy_score(y_test, mlp.predict(X_test))
+
+    print("Acurácia do treinamento:", train_acc)
+    print("Acurácia do treino:", test_acc)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, mean_squared_error, mean_absolute_error
+    y_pred = mlp.predict(X_test)
+    print("Precisão:", precision_score(y_test, y_pred, average='macro'))
+    print("Recall:", recall_score(y_test, y_pred, average='macro'))
+    print("F1-Score:", f1_score(y_test, y_pred, average='macro'))
+    print("MSE:", mean_squared_error(y_test, y_pred))
+    print("MAE:", mean_absolute_error(y_test, y_pred))
+    print("RMSE:", mean_squared_error(y_test, y_pred, squared=False))
+    ```
+    
+    2.MLP-Regressor: rede neural multicamadas para problemas de regressão, Prevê valores contínuos (ex.: preço, temperatura, pontuação), Usa funções de perda como erro quadrático médio (MSE) para otimizar a diferença entre previsões e valores reais.
+   
+    ```python
+    # Passo 5: Treinamento do MLPRegressor
+    start_time = time()
+    mlp = MLPRegressor(hidden_layer_sizes=(100, 50), max_iter=1000, activation='logistic', solver='adam', random_state=42, verbose=True)
+    mlp.fit(X_train, y_train)
+    fit_time = time() - start_time
+    print("Tempo de treinamento (MLPRegressor):", fit_time)
+
+    # Avaliação no treino
+    y_pred_train = mlp.predict(X_train)
+    print("\nMétricas no treinamento (MLPRegressor):")
+    print("MSE:", mean_squared_error(y_train, y_pred_train))
+    print("MAE:", mean_absolute_error(y_train, y_pred_train))
+    print("RMSE:", mean_squared_error(y_train, y_pred_train, squared=False))
+    print("R²:", r2_score(y_train, y_pred_train))
+    
+    # Avaliação no teste
+    y_pred_test = mlp.predict(X_test)
+    print("\nMétricas no teste (MLPRegressor):")
+    print("MSE:", mean_squared_error(y_test, y_pred_test))
+    print("MAE:", mean_absolute_error(y_test, y_pred_test))
+    print("RMSE:", mean_squared_error(y_test, y_pred_test, squared=False))
+    print("R²:", r2_score(y_test, y_pred_test))
+    ```
+    
+10. Validação Cruzada: dividir treino em k folds (ex.: 5-fold), treinar e testar em cada dobra, e coletar métricas.
+```Python
+#definir a quantidade de dobras
+kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+#realizar a validação cruzada
+scores = cross_val_score(mlp, X_entrada, y_saida, cv=kfold)
+print("Acurácia média: {:.2f}%".format(scores.mean() * 100))
+print("Desvio padrão: {:.2f}%".format(scores.std() * 100))
+print("Acurácia: ",scores)
+```
+        
+11. Clusterin não supervisionado (K-Means): Treinar KMeans para diferentes números de clusters (ex.: 1 a 10) e plotar a inércia (soma dos quadrados das distâncias aos centroides) contra k. O "cotovelo" indica o número ótimo de clusters.
+
+```Python
+from sklearn.cluster import KMeans
+inercia = []
+for k in range(1, 11):
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(X_scaled)
+    inercia.append(kmeans.inertia_)
+
+plt.plot(range(1, 11), inercia, marker='o')
+plt.title('Método do Cotovelo')
+plt.xlabel('Número de Clusters')
+plt.ylabel('Inércia')
+plt.show()
+
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+kmeans = KMeans(n_clusters=3, random_state=42)
+base['Cluster'] = kmeans.fit_predict(X_scaled)
+plt.scatter(X_pca[:, 0], X_pca[:, 1], c=base['Cluster'], cmap='viridis')
+plt.title('Clusters em 2D (PCA)')
+plt.show()
+
+print(base.groupby('Cluster').mean())
+```
+    
+12. Treinamento Arvore de decisão: RandomForestClassifier é um modelo de ensemble que combina várias árvores de decisão para melhorar a precisão e reduzir o overfitting.<br>
+- X_train, X_test, y_train, y_test são os dados de treino e teste já preparados.<br>
+- X_entrada e y_saida são os dados completos (antes da divisão treino/teste).<br>
+- kfold é um objeto de validação cruzada (ex.: StratifiedKFold).<br>
+- base é o DataFrame com os dados originais.
+
+```Python
+from sklearn.ensemble import RandomForestClassifier
+rf_model = RandomForestClassifier(n_estimators=100, criterion="entropy")
+rf_model.fit(X_train, y_train)
+
+#Previsão com o Modelo
+rf_preds = rf_model.predict(X_test)
+
+# Avaliação
+print("=== Random Forest ===")
+print("Acurácia:", accuracy_score(y_test, rf_preds))
+```
+
+- Visualização da Arvore de Decisão
+```Python
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+
+arvore = rf_model.estimators_[0]
+
+# Plot the decision tree
+plt.figure(figsize=(20, 10))
+colunas = base.columns[1:5].tolist()
+plot_tree(arvore, feature_names=colunas, filled=True, rounded=True, fontsize=10)
+plt.title("Decision Tree from Random Forest")
+plt.show()
+
+#Validação cruzada com acuracia
+rf_scores = cross_val_score(rf_model, X_entrada, y_saida, cv=kfold)
+print("Acurácia média: {:.2f}%".format(rf_scores.mean() * 100))
+print("Desvio padrão: {:.2f}%".format(rf_scores.std() * 100))
+print("Acurácia: ", rf_scores)
+
+#Validação Cruzada com Múltiplas Métricas
+precisao = make_scorer(precision_score, average='macro')
+recall = make_scorer(recall_score, average='macro')
+rf_validate = cross_validate(rf_model, X_entrada, y_saida,
+  cv=kfold, scoring={'accuracy': 'accuracy', 'precision': precisao, 'recall': recall},
+  return_train_score=True)
+df_validate = pd.DataFrame(rf_validate)
+df_validate
+```
